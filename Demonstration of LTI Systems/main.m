@@ -26,6 +26,8 @@ out_scaled = output(scale*input);  %Computing scaled output
 
 ok = 1;
 
+disp("System output is, y[n] = x[n]+x[n+1]+x[n+2]");
+disp("-------------------------------------------");
 disp("Checking for homogeniety......");
 disp("input is......");
 1*input
