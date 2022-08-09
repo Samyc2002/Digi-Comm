@@ -16,6 +16,7 @@ end
 
 function input = in2(size)
     input = zeros(size, 1);  %Taking a vector of zeros
-    mid = floor(size/2)  + 1;
-    input(mid+2) = 1;  %Using an impulse function
+    t = 1:size;
+    mid = floor(size/2) + 1;
+    input(t>=mid) = 1;  %Using an unit stepfunction
 end
