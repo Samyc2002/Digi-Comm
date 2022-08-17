@@ -1,9 +1,8 @@
 function out = system(size)
     out = zeros(size, 1);
-    mid = floor(size/2) + 1;
-    out(mid-2) = 1;
-    out(mid-1) = 1;
-    out(mid) = 1;
-    out(mid+1) = 1;
-    out(mid+2) = 1;
+    Start = floor((size-1)/4);
+    End = 3*floor((size-1)/4);
+    for i=Start:End
+        out(i) = 1;
+    end
 end
