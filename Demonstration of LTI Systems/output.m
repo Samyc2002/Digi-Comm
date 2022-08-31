@@ -6,4 +6,3 @@ function y = output(x)
     end
     %y(floor(n/2)+1) = 10;
 end
-
