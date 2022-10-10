@@ -4,6 +4,8 @@ function output = getConstellationOrBits(type)
             output = getBits();
         case "constellation"
             output = getConstellation();
+        case "grey"
+            output = getGrey();
         case "nFactor"
             output = getNFactor();
         otherwise
@@ -12,13 +14,17 @@ function output = getConstellationOrBits(type)
 end
 
 function constellation = getConstellation()
-    constellation = [-1, 1];
+    constellation = [1+1i -1+1i -1-1i 1-1i];
 end
 
 function parentBits = getBits()
-    parentBits = [0, 1];
+    parentBits = ["00", "01", "10", "11"];
+end
+
+function grey = getGrey()
+    grey=[0 1 3 2];
 end
 
 function nFactor = getNFactor()
-    nFactor = sqrt(2);
+    nFactor = double(1.0)/double(sqrt(2));  %The normalizing factor
 end
