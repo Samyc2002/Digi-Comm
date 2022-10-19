@@ -36,15 +36,59 @@ function [H, dmin, stdArr, S, decodedBits] = linearDecoder(G, rxBits, strategy)
     end
     
 %     Generating standard array
-    stdArr = zeros(cols+1, 2^rows, cols);
-     for i=1:2^rows
-        for j=1:cols
-            stdArr(1, i, j) = nCodewords(i, j);
+    standardArray = zeros(2^(cols-rows), 2^rows, cols);
+    for k=1:cols+1
+        for i=1:2^rows
+            for j=1:cols
+                standardArray(k, i, j) = nCodewords(i, j);
+            end
         end
     end
     for i=2:cols+1
         for j=1:2^rows
-            stdArr(i, j, i-1) = 1 - stdArr(i, j, i-1);
+            standardArray(i, j, i-1) = 1 - standardArray(i, j, i-1);
+        end
+    end
+    for i=cols+2:2^(cols-rows)
+        for j=1:2^rows
+            codeword = [];
+            for m=1:cols
+                codeword = [codeword standardArray(i, j, m)];
+            end
+            for m=1:cols
+                for n=1:cols
+                    if m==n
+                        continue;
+                    else
+                        codeword(m) = 1 - codeword(m);
+                        codeword(n) = 1 - codeword(n);
+                        matches = 0;
+                        for a=1:2^(cols-rows)
+                            for b=1:2^rows
+                                for c=1:cols
+                                    if codeword(c) == standardArray(a, b, c)
+                                        matches = matches+1;
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+            if matches==cols
+                continue;
+            else
+                for a=1:cols
+                    standardArray(i, j, a) = 1 - codeword(a);
+                end
+            end
+        end
+    end
+
+%     Formatting standard array
+    for i=1:2^(cols-rows)
+        for j=1:2^rows
+            stdArr(i, j) = strjoin(string(standardArray(i, j, :)), "");
         end
     end
 
@@ -76,7 +120,7 @@ function [H, dmin, stdArr, S, decodedBits] = linearDecoder(G, rxBits, strategy)
             for j=1:2^rows
                 matches = 0;
                 for k=1:cols
-                    if rxBits(k)==stdArr(i, j, k)
+                    if rxBits(k)==standardArray(i, j, k)
                         matches = matches + 1;
                     end
                 end
