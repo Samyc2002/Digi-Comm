@@ -29,22 +29,142 @@ function [H, dmin, stdArr, S, decodedBits] = linearDecoder(G, rxBits, strategy)
     kCodewords = 0:(2^rows)-1;
     nCodewords = zeros(2^rows, cols);
     for i=1:length(kCodewords)
-        d = dec2bin(kCodewords(i), cols)-'0';
+        d = dec2bin(kCodewords(i), rows)-'0';
+        d = d*G;
+        for j=1:length(d)
+            d(j) = rem(d(j), 2);
+        end
         for j=1:length(d)
             nCodewords(i, j) = d(j);
         end
     end
     
 %     Generating standard array
-    stdArr = zeros(cols+1, 2^rows, cols);
-     for i=1:2^rows
-        for j=1:cols
-            stdArr(1, i, j) = nCodewords(i, j);
+    standardArray = zeros(2^(cols-rows), 2^rows, cols);
+    for k=1:cols+1
+        for i=1:2^rows
+            for j=1:cols
+                standardArray(k, i, j) = nCodewords(i, j);
+            end
         end
     end
     for i=2:cols+1
         for j=1:2^rows
-            stdArr(i, j, i-1) = 1 - stdArr(i, j, i-1);
+%             codeword = [];
+%             for m=1:cols
+%                 codeword = [codeword standardArray(i, j, m)];
+%             end
+%             for n=1:cols
+%                 codeword(n) = 1 - codeword(n);
+%                 matches = 0;
+%                 for a=2:i
+%                     for b=1:2^rows
+%                         for c=1:cols
+%                             if codeword(c) == standardArray(a, b, c)
+%                                 matches = matches+1;
+%                             end
+%                         end
+%                     end
+%                 end
+%             end
+%             if matches==cols
+%                 continue;
+%             else
+%                 for a=1:cols
+%                     standardArray(i, j, a) = 1 - codeword(a);
+%                 end
+%             end
+            standardArray(i, j, i-1) = 1 - standardArray(i, j, i-1);
+        end
+    end
+%     o = [];
+    for i=cols+2:2^(cols-rows)
+        for j=1:2^rows
+            codeword = [];
+            for m=1:cols
+                codeword = [codeword standardArray(1, j, m)];
+            end
+            found = 0;
+            disp("initial");
+            disp(bin2dec(int2str(codeword)));
+            for m=1:cols
+                if found==1
+                    break;
+                end
+                for n=1:cols
+                    if found==1
+                        break;
+                    end
+                    if m==n
+                        continue;
+                    else
+                        if found==1
+                            break;
+                        end
+                        codeword(m) = 1 - codeword(m);
+                        codeword(n) = 1 - codeword(n);
+                        for a=1:i-1
+                            if found==1
+                                break;
+                            end
+                            for b=1:2^rows
+                                if found==1
+                                    break;
+                                end
+                                matches = 0;
+                                for c=1:cols
+                                    if codeword(c) == standardArray(a, b, c)
+                                        matches = matches+1;
+                                    end
+                                end
+                                if matches==cols
+                                    continue;
+                                else
+                                    for x=1:cols
+                                        standardArray(i, j, x) = codeword(x);
+                                    end
+                                    disp("final");
+                                    disp(bin2dec(int2str(codeword)));
+                                    found = 1;
+                                end
+                            end
+                        end
+                        a=i;
+                        if found==1
+                            break;
+                        end
+                        for b=1:j-1
+                            if found==1
+                                break;
+                            end
+                            matches = 0;
+                            for c=1:cols
+                                if codeword(c) == standardArray(a, b, c)
+                                    matches = matches+1;
+                                end
+                            end
+                            if matches==cols
+                                continue;
+                            else
+                                for x=1:cols
+                                    standardArray(i, j, x) = codeword(x);
+                                end
+                                disp("final");
+                                disp(bin2dec(int2str(codeword)));
+                                found = 1;
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+
+%     Formatting standard array
+    for i=1:2^(cols-rows)
+        for j=1:2^rows
+            stdArr(i, j) = strjoin(string(standardArray(i, j, :)), "");
         end
     end
 
@@ -76,7 +196,7 @@ function [H, dmin, stdArr, S, decodedBits] = linearDecoder(G, rxBits, strategy)
             for j=1:2^rows
                 matches = 0;
                 for k=1:cols
-                    if rxBits(k)==stdArr(i, j, k)
+                    if rxBits(k)==standardArray(i, j, k)
                         matches = matches + 1;
                     end
                 end
