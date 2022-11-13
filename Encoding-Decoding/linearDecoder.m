@@ -9,7 +9,7 @@ function [H, dmin, stdArr, S, decodedBits] = linearDecoder(G, rxBits, strategy)
     H = gen2par(G);
     dmin = min(sum(G, 2));
 
-    % Generating coedwords
+    % Generating codewords
     kCodewords = 0:(2^rows)-1;
     nCodewords = zeros(2^rows, cols);
     for i=1:length(kCodewords)
@@ -24,6 +24,7 @@ function [H, dmin, stdArr, S, decodedBits] = linearDecoder(G, rxBits, strategy)
     end
     
     % Generating standard array
+    % For 0 bit errors
     standardArray = zeros(2^(cols-rows), 2^rows, cols);
     for k=1:cols+1
         for i=1:2^rows
@@ -32,11 +33,13 @@ function [H, dmin, stdArr, S, decodedBits] = linearDecoder(G, rxBits, strategy)
             end
         end
     end
+    % For 1 bit errors
     for i=2:cols+1
         for j=1:2^rows
             standardArray(i, j, i-1) = 1 - standardArray(i, j, i-1);
         end
     end
+    % For 2 bit errors
     for i=cols+2:2^(cols-rows)
         for j=1:2^rows
             codeword = [];
@@ -119,7 +122,6 @@ function [H, dmin, stdArr, S, decodedBits] = linearDecoder(G, rxBits, strategy)
         end
     end
 
-
     % Formatting standard array
     for i=1:2^(cols-rows)
         for j=1:2^rows
@@ -167,7 +169,7 @@ function [H, dmin, stdArr, S, decodedBits] = linearDecoder(G, rxBits, strategy)
         end
     end
 
-%     Decoding using Syndrome Table
+    % Decoding using Syndrome Table
     if strcmp(strategy, "syn")
         syn = H*rxBits';
         for i=1:cols+1
